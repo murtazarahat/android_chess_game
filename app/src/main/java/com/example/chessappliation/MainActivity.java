@@ -20,20 +20,38 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    // Variable To Check Whose Turn It Is
     public Boolean FirstPlayerTurn;
+
+    // Coordinates of the board
     public ArrayList<Coordinates> listOfCoordinates = new ArrayList<>();
+
+    // Board For Player
     public Position[][] Board = new Position[8][8];
+
+    // Board For Player
     public Position[][] Board2 = new Position[8][8];
+
+    // Variable to check if anything on the board is selected
     public Boolean AnythingSelected = false;
+
+    // Last Position of the selected piece
     public Coordinates lastPos = null ;
+
+    // Variable to check clickedPosition of the palyer
     public Coordinates clickedPosition = new Coordinates(0, 0);
     public TextView game_over;
     public TextView[][] DisplayBoard = new TextView[8][8];
     public TextView[][] DisplayBoardBackground = new TextView[8][8];
+
+    // History of the moves that players do
     public ArrayList<Position[][]> LastMoves = new ArrayList<>();
     public LinearLayout pawn_choices;
+
+    // Total Number of moves
     public int numberOfMoves;
 
+    // Variables For Each Piece
     Piece bKing;
     Piece wKing;
 
@@ -77,11 +95,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Making notification bar transparent
-        if (Build.VERSION.SDK_INT >= 21) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
+        // Initializing Board With Pieces
         initializeBoard();
 
         game_over = (TextView)findViewById(R.id.game_over);
@@ -131,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         wPawn7 = new Pawn(true);
         wPawn8 = new Pawn(true);
 
+        // Setting their position on the board
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Board[i][j] = new Position(null);
@@ -174,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Board[6][1].setPiece(bPawn7);
         Board[7][1].setPiece(bPawn8);
 
+        // Setting their background
         DisplayBoard[0][0] = (TextView) findViewById(R.id.R00);
         DisplayBoardBackground[0][0] = (TextView) findViewById(R.id.R000);
         DisplayBoard[1][0] = (TextView) findViewById(R.id.R10);
@@ -320,9 +339,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
+        // Initializing The board variable before start of the game
         numberOfMoves = 0;
         AnythingSelected = false;
         FirstPlayerTurn = true;
+
+        // Updating the board
         setBoard();
     }
 
@@ -400,12 +422,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }
+
+        // Check if the king is in danger
         isKingInDanger();
     }
 
     @Override
     public void onClick(View v) {
 
+        // Click Listener For Every Click that user does on the screen
         switch (v.getId()) {
             case R.id.R00:
                 clickedPosition = new Coordinates(0, 0);
@@ -671,12 +696,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
 
+        // After every click we check if the user selected anything or not
         if (!AnythingSelected) {
             if(Board[clickedPosition.getX()][clickedPosition.getY()].getPiece() == null) {
+                // Checking Everytime user click to see if the king is in danger or not
                 isKingInDanger();
                 return;
             }else{
                 if(Board[clickedPosition.getX()][clickedPosition.getY()].getPiece().isWhite() != FirstPlayerTurn){
+                    // Checking Everytime user click to see if the king is in danger or not
                     isKingInDanger();
                     return;
                 }else{
@@ -690,7 +718,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             if(Board[clickedPosition.getX()][clickedPosition.getY()].getPiece() == null){
                 if(moveIsAllowed(listOfCoordinates , clickedPosition)){
-
+                    // Updating board after every click
                     saveBoard();
                     if(Board[clickedPosition.getX()][clickedPosition.getY()].getPiece() instanceof King){
                         if(Board[clickedPosition.getX()][clickedPosition.getY()].getPiece().isWhite() != FirstPlayerTurn){
@@ -771,6 +799,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setBoard();
     }
 
+    /**
+     * Saves the board after every event/click
+     */
     public void saveBoard(){
         numberOfMoves++;
         LastMoves.add(numberOfMoves-1 ,Board2 );
@@ -792,6 +823,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * This fucntion undos the last move
+     * @param v
+     */
     public void undo(View v){
         if(numberOfMoves>0) {
 
@@ -822,6 +857,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * This function calculates the piece move and shifts the pawn to that position and changes color
+     * @param v
+     */
     public void pawnChoice(View v){
         int x = v.getId();
         switch (x){
@@ -866,6 +905,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pawn_choices.setVisibility(View.INVISIBLE);
     }
 
+    /**
+     * This fucntion resets the color of the coordinates that a piece moved to and in between
+     * @param listOfCoordinates
+     */
     private void resetColorAtAllowedPosition(ArrayList<Coordinates> listOfCoordinates) {
         for(int i=0; i<listOfCoordinates.size(); i++){
             if((listOfCoordinates.get(i).getX() + listOfCoordinates.get(i).getY())%2==0){
@@ -876,6 +919,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * This fucntion changes the color of the allowed place that a piece can move to
+     * @param list coordinates of the
+     */
     void setColorAtAllowedPosition(ArrayList<Coordinates> list){
 
         for(int i=0; i<list.size(); i++){
@@ -887,6 +934,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * This function checks if the move is allowed by the player as respect to the piece
+     * @param piece the piece the user wants to move
+     * @param coordinate coordinates of the board
+     * @return false / true
+     */
     private boolean moveIsAllowed(ArrayList<Coordinates> piece, Coordinates coordinate) {
         Boolean Allowed = false;
         for(int i =0;i<piece.size();i++){
@@ -898,6 +951,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return Allowed;
     }
 
+    /**
+     * Resets the color after user finished moving the piece
+     * @param lastPos last position of the piece
+     */
     private void resetColorAtLastPosition(Coordinates lastPos){
         if((lastPos.getX() + lastPos.getY())%2==0){
             DisplayBoardBackground[lastPos.getX()][lastPos.getY()].setBackgroundResource(R.color.colorBoardDark);
@@ -906,6 +963,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * This function tests and see if the king is in danger
+     * by checking the opposite player's piece's location and their moves
+     */
     private void isKingInDanger(){
         ArrayList<Coordinates> List = new ArrayList<>();
 
@@ -935,6 +996,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Checking if any of the pawns endangering the king or not
+     */
     private void checkForPawn(){
         if(Board[clickedPosition.getX()][clickedPosition.getY()].getPiece() instanceof Pawn){
             if(Board[clickedPosition.getX()][clickedPosition.getY()].getPiece().isWhite()){
